@@ -1,0 +1,31 @@
+## dados importados de DataVerse
+country_hsproduct6digit_year <- read.csv("C:/Users/Proprietario/Downloads/country_hsproduct6digit_year.csv")
+hs6_2018 <- subset(country_hsproduct6digit_year, year == 2018)
+hs6_PRT <- subset(country_hsproduct6digit_year, location_code == "PRT")
+HS6_CORE <- subset(country_hsproduct6digit_year, subset = (country_hsproduct6digit_year$hs_product_code%in%c(720711, 720712, 720719, 720720, 721410, 721420, 721430, 721440, 722810, 722820, 722830, 722840, 722850, 722860, 722870, 722880, 730711, 730719, 730721, 730722, 730723, 730729, 730791, 730792, 730793, 730799, 730820, 730890, 732611, 732619, 732620, 732690, 841290, 848210, 848220, 848230, 848240, 848250, 848280, 848299, 848320, 848330, 848340, 848350, 848360, 848390, 850161, 850162, 850163, 850164, 850231, 850300, 850421, 850422, 850430, 850432, 850433, 850440, 850490, 853510, 853521, 853529, 853530, 853540, 853590, 853710, 853720, 853810, 853890, 902830, 903020, 903031, 903039, 903289)))
+
+#seleção dos 128 países que tem população acima de 1.2 milhão e comércio superior a 1 bilhão (lista do Atlas)
+HS6_filtro <- subset(country_hsproduct6digit_year, subset = (country_hsproduct6digit_year$location_code%in%c("UGA","HND","PER","MDG","OMN","KAZ","ECU","BWA","TZA","UZB","NIC","KHM","CIV","GHA","BOL","LAO","BGD","ETH","ZMB","MWI","YEM","TJK","MOZ","MLI","VEN","LBR","MNG","DZA","TKM","KWT","AZE","IRN","LBY","GAB","CMR","NGA","GIN","PNG","COG","SDN","AGO","MRT","LBN","JOR","RUS","TUN","NZL","CRI","MDA","IND","BRA","GRC","COL","ZAF","URY","ARG","ALB","PHL","SLV","IDN","MKD","EGY","DOM","GTM","ARE","VNM","SAU","KGZ","GEO","LKA","NAM","KEN","SEN","SYR","TTO","MUS","CHL","AUS","ZWE","JAM","PAK","MAR","CUB","QAT","PRY","JPN","DEU","CHE","SWE","AUT","FIN","SGP","CZE","GBR","SVN","FRA","KOR","USA","HUN","SVK","ITA","DNK","IRL","ISR","MEX","BLR","BEL","NLD","HKG","POL","HRV","ROU","ESP","CHN","PAN","THA","EST","NOR","MYS","PRT","LTU","SRB","BIH","LVA","BGR","CAN","UKR","TUR")))
+
+#exclusão das linhas sem exportação
+HS6_filtro1<-subset(HS6_filtro, subset = (HS6_filtro$export_value > 0))
+
+#cálculo do PCI (média dos ECI dos países exportadores)
+library(dplyr)
+media <- HS6_filtro1 %>%   group_by(hs_product_code, year) %>%  summarise_at(vars("hs_eci"), mean)
+media_core <- subset(media, media$hs_product_code%in%c(720711, 720712, 720719, 720720, 721410, 721420, 721430, 721440, 722810, 722820, 722830, 722840, 722850, 722860, 722870, 722880, 730711, 730719, 730721, 730722, 730723, 730729, 730791, 730792, 730793, 730799, 730820, 730890, 732611, 732619, 732620, 732690, 841290, 848210, 848220, 848230, 848240, 848250, 848280, 848299, 848320, 848330, 848340, 848350, 848360, 848390, 850161, 850162, 850163, 850164, 850231, 850300, 850421, 850422, 850430, 850432, 850433, 850440, 850490, 853510, 853521, 853529, 853530, 853540, 853590, 853710, 853720, 853810, 853890, 902830, 903020, 903031, 903039, 903289))
+write.csv(media_core, "C:/Users/Proprietario/Downloads/media_eci_core.csv")
+
+#cálculo do RCA, quatro etapas= exportações totais do mundo em cada ano, exportações de cada paises em cada ano, exportações totais de cada produto a cada ano e exportações totais de Portugal
+# (rca4/rca2)/(rca3/rca1)
+rca1 <- HS6_filtro1 %>%   group_by(year) %>%  summarise_at(vars("export_value"), sum)
+rca2 <- HS6_filtro1 %>%   group_by(year,location_code) %>%  summarise_at(vars("export_value"), sum)
+rca3 <- HS6_filtro1 %>%   group_by(year,hs_product_code) %>%  summarise_at(vars("export_value"), sum)
+rca4<-subset(HS6_filtro1, location_code=="PRT")
+
+write.csv(rca1, "C:/Users/Proprietario/Downloads/rca1_1.csv")
+write.csv(rca2, "C:/Users/Proprietario/Downloads/rca2.csv")
+write.csv(rca3, "C:/Users/Proprietario/Downloads/rca3.csv")
+write.csv(rca4, "C:/Users/Proprietario/Downloads/rca4.csv")
+
+
